@@ -1,0 +1,54 @@
+name: Update Vulnerability Database
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute release version
+        id: version
+        run: echo "tag=1.0.0-$(date -u +'%Y%m%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Download Maven vulnerabilities
+        run: |
+          curl -fsSL https://storage.googleapis.com/osv-vulnerabilities/Maven/all.zip \
+            -o maven-all.zip
+          unzip -t maven-all.zip > /dev/null
+
+      - name: Download npm vulnerabilities
+        run: |
+          curl -fsSL https://storage.googleapis.com/osv-vulnerabilities/npm/all.zip \
+            -o npm-all.zip
+          unzip -t npm-all.zip > /dev/null
+
+      - name: Delete existing releases and tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Delete all existing releases one by one until none remain
+          while true; do
+            tag=$(gh release list --repo "$REPO" --limit 1 --json tagName \
+              --jq '.[0].tagName // empty')
+            [ -z "$tag" ] && break
+            gh release delete "$tag" --repo "$REPO" --yes --cleanup-tag || true
+          done
+
+      - name: Create GitHub Release with assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --repo "$REPO" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes "Automated daily mirror of OSV vulnerability data from gs://osv-vulnerabilities. Downloaded on $(date -u +'%Y-%m-%d')." \
+            maven-all.zip \
+            npm-all.zip
