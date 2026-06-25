@@ -20,20 +20,24 @@ jobs:
         run: |
           curl -fsSL https://storage.googleapis.com/osv-vulnerabilities/Maven/all.zip \
             -o maven-all.zip
+          unzip -t maven-all.zip > /dev/null
 
       - name: Download npm vulnerabilities
         run: |
           curl -fsSL https://storage.googleapis.com/osv-vulnerabilities/npm/all.zip \
             -o npm-all.zip
+          unzip -t npm-all.zip > /dev/null
 
-      - name: Delete existing release and tag
+      - name: Delete existing releases and tags
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          # Delete all existing releases (keep only one at a time)
-          gh release list --repo "$REPO" --limit 100 --json tagName \
-            --jq '.[].tagName' | while read -r tag; do
+          # Delete all existing releases one by one until none remain
+          while true; do
+            tag=$(gh release list --repo "$REPO" --limit 1 --json tagName \
+              --jq '.[0].tagName // empty')
+            [ -z "$tag" ] && break
             gh release delete "$tag" --repo "$REPO" --yes --cleanup-tag || true
           done
 
