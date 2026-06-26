@@ -3,6 +3,7 @@ name: Update Vulnerability Database
 on:
   schedule:
     - cron: '0 4 * * *'
+      timezone: "Europe/Berlin"
   workflow_dispatch:
 
 permissions:
