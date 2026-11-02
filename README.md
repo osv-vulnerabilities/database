@@ -16,6 +16,7 @@ datasets via standard GitHub Release assets — no GCS access required.
 |-----------|-----------|
 | Maven | `https://storage.googleapis.com/osv-vulnerabilities/Maven/all.zip` |
 | npm | `https://storage.googleapis.com/osv-vulnerabilities/npm/all.zip` |
+| Wolfi | `https://storage.googleapis.com/osv-vulnerabilities/Wolfi/all.zip` |
 
 ## Downloading the latest artifacts
 
@@ -24,6 +25,7 @@ you need:
 
 - `maven-all.zip` — all Maven advisories
 - `npm-all.zip` — all npm advisories
+- `wolfi-all.zip` — all Wolfi advisories
 
 Direct link to the latest release:
 ```

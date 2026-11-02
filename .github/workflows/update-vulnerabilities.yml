@@ -29,6 +29,12 @@ jobs:
             -o npm-all.zip
           unzip -t npm-all.zip > /dev/null
 
+      - name: Download Wolfi vulnerabilities
+        run: |
+          curl -fsSL https://storage.googleapis.com/osv-vulnerabilities/Wolfi/all.zip \
+            -o wolfi-all.zip
+          unzip -t wolfi-all.zip > /dev/null
+
       - name: Delete existing releases and tags
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,4 +58,5 @@ jobs:
             --title "${{ steps.version.outputs.tag }}" \
             --notes "Automated daily mirror of OSV vulnerability data from gs://osv-vulnerabilities. Downloaded on $(date -u +'%Y-%m-%d')." \
             maven-all.zip \
-            npm-all.zip
+            npm-all.zip \
+            wolfi-all.zip
